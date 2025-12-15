@@ -1,7 +1,7 @@
 package simpleexample;
 
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.functions.sink.legacy.SinkFunction;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
