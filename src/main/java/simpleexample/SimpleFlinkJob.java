@@ -4,7 +4,8 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.util.Collector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;   
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 
 
 public class SimpleFlinkJob {
@@ -28,8 +29,28 @@ public class SimpleFlinkJob {
                 .addSink(new CustomSink())
                 .name("custom-sink");
 
+        DataStream<Tuple2<String, Integer>> anotherStream = inputStream
+                .flatMap(new CustomTokenizer())
+                .keyBy(value -> value.f0)
+                .sum(1)
+                .name("wordcounts-sum");
+        
+        anotherStream
+                .print()
+                .name("print-sink");
+                
         // Execute the Flink job
         env.execute("Simple Flink Job");
+    }
+
+    public static class CustomTokenizer implements FlatMapFunction<String, Tuple2<String, Integer>> {
+        @Override
+        public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
+            String[] tokens = value.split("\\s+");
+            for (String token : tokens) {
+                out.collect(new Tuple2<>(token, 1));
+            }
+        }
     }
 
 }
