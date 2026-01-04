@@ -15,29 +15,40 @@ public class SimpleFlinkJob {
 
         // Create a simple input data stream
         DataStream<String> inputStream = env
-                .fromElements("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+                .fromElements("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "thirty three", "forty four", "fifty three", "fifty five")
                 .name("input-data");
 
         // Perform a simple transformation
-        DataStream<Tuple2<String, Integer>> resultStream = inputStream
+        DataStream<Tuple2<String, Integer>> wordLengths = inputStream
                 .map(value -> new Tuple2<>(value, value.length()))
                 .returns(Types.TUPLE(Types.STRING, Types.INT))
                 .name("map-to-length");
 
         // Add the custom sink
-        resultStream
-                .addSink(new CustomSink())
-                .name("custom-sink");
+        wordLengths
+                .addSink(new CustomSink("wordLengths-sink"))
+                .name("wordLengths-sink");
 
-        DataStream<Tuple2<String, Integer>> anotherStream = inputStream
+        DataStream<Tuple2<String, Integer>> wordLengthsFiltered = wordLengths
+                .filter(value -> value.f1 > 4)
+                .name("filtered");
+
+        wordLengthsFiltered
+                .addSink(new CustomSink("wordLengths-filtered-sink"))
+                .name("wordLengths-filtered-sink");
+
+        // Occurencies with CustomTokenizer
+        DataStream<Tuple2<String, Integer>> occurenceStream = inputStream
                 .flatMap(new CustomTokenizer())
                 .keyBy(value -> value.f0)
                 .sum(1)
                 .name("wordcounts-sum");
+
+        occurenceStream
+                .addSink(new CustomSink("occurenceStream-sink"))
+                .name("occurenceStream-sink");
         
-        anotherStream
-                .print()
-                .name("print-sink");
+        
                 
         // Execute the Flink job
         env.execute("Simple Flink Job");
