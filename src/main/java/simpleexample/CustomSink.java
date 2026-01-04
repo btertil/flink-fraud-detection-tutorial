@@ -10,10 +10,19 @@ public class CustomSink implements SinkFunction<Tuple2<String, Integer>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomSink.class);
 
+    final String sinkName;
+    public CustomSink(String sinkName) {
+        if (sinkName == null || sinkName.isEmpty()) {
+            this.sinkName = "CustomSink";
+        } else {
+        this.sinkName = sinkName;
+        }
+    }
+
     @Override
     public void invoke(Tuple2<String, Integer> value, Context context) throws Exception {
         // Custom sink logic (e.g., write to a database or external system)
-        LOG.info("Sink received: " + value);
+        LOG.info("Sink " + sinkName + " received: " + value);
     }
 
 }
