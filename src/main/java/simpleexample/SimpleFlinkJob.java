@@ -13,6 +13,13 @@ public class SimpleFlinkJob {
     public static void main(String[] args) throws Exception {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        // Configure for educational clarity
+        env.setParallelism(1);
+        env.disableOperatorChaining();
+        
+        // Enable checkpointing for fault tolerance (60 seconds)
+        env.enableCheckpointing(60000);
+        
         // Create a simple input data stream
         DataStream<String> inputStream = env
                 .fromElements("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "thirty three", "forty four", "fifty three", "fifty five")
